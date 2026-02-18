@@ -10,7 +10,7 @@ This lab simulates a small enterprise network environment where a Windows Server
 
 - <b>Windows Server (DC01)
 - Windows 10/11 Client (CLIENT01)
-- VMware
+- VMware Fusion
 - Private IPv4 network (192.168.10.0/24)
 - Server Manager
 - DHCP Management Console
