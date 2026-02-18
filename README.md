@@ -19,15 +19,21 @@ This lab simulates a small enterprise network environment where a Windows Server
 
 <h2>Key Tasks Performed</h2>
 
-Created Organizational Units (IT, Finance, HR) and security groups for each department
+Installed and configured the DHCP Server role on Windows Server
 
-Built a CSV file to simulate HR onboarding data and imported into Powershell
+Created and activated a DHCP scope (192.168.10.100–192.168.10.200)
 
-Generated usernames automatically (first initial + last name) and secure temporary passwords
+Configured DHCP options including default gateway and DNS server
 
-Automated creating Active Directory user accounts, assigned them to the correct OUs based on departments and added them to department-based security groups
+Created a DHCP reservation to assign a consistent IP address to a client device
 
-Exported a provisioning report to CSV
+Verified dynamic IP assignment using ipconfig /release and ipconfig /renew
+
+Configured and verified a DNS forward lookup zone (lab.local)
+
+Tested internal name resolution using ping and nslookup
+
+Simulated a DNS misconfiguration and performed troubleshooting to restore connectivity
 
 <h2>Skills Demonstrated </h2>
 
@@ -69,64 +75,6 @@ Executed the PowerShell provisioning script (Provision-NewHires.ps1) from the C:
 Verified that the script exported a structured CSV report containing. <br/> <br/>
 <img width="80%" height="80%" alt="Screenshot 2026-02-16 at 11 37 46 PM" src="https://github.com/user-attachments/assets/4c203c65-2645-4c02-92f4-bccc93de07ff" />
 
-
-<h2>Powershell Script:</h2>
-
-    # Loads the Active Directory PowerShell commands
-    Import-Module ActiveDirectory
-
-    # Reads the HR spreadsheet (CSV) into a list of user records
-    $users = Import-Csv "C:\HR-NewHires.csv"
-
-    # This will store results so we can export a report at the end
-    $report = @()
-
-    # Loop through each row in the CSV (each employee)
-    foreach ($user in $users) {
-
-    # Build a username like: jreed (first initial + last name)
-    $username = ($user.FirstName.Substring(0,1) + $user.LastName).ToLower()
-
-    # Generate a random temporary password (12 chars, includes 2 special chars)
-    Add-Type -AssemblyName System.Web
-    $password = [System.Web.Security.Membership]::GeneratePassword(12,2)
-
-    # Convert the password to a secure format required by New-ADUser
-    $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
-
-    # Choose which OU the user goes into based on Department
-    # Example: OU=IT,DC=nylab,DC=local
-    $ouPath = "OU=$($user.Department),REPLACE_WITH_YOUR_DOMAIN_DN"
-
-    # Create the user in Active Directory
-    New-ADUser `
-        -Name "$($user.FirstName) $($user.LastName)" `
-        -GivenName $user.FirstName `
-        -Surname $user.LastName `
-        -SamAccountName $username `
-        -UserPrincipalName "$username@REPLACE_WITH_YOUR_DOMAIN_DNS" `
-        -Path $ouPath `
-        -AccountPassword $securePassword `
-        -Enabled $true `
-        -ChangePasswordAtLogon $true `
-        -Title $user.Title `
-        -Department $user.Department
-
-    # Add the user to the correct department security group (like IT-Users)
-    Add-ADGroupMember -Identity "$($user.Department)-Users" -Members $username
-
-    # Add this user to our report object (so we can export results)
-    $report += [PSCustomObject]@{
-        Name = "$($user.FirstName) $($user.LastName)"
-        Username = $username
-        Department = $user.Department
-        TemporaryPassword = $password
-      }
-
-    }
-    # Export the results to a CSV so we have proof / documentation
-    $report | Export-Csv "C:\ProvisioningReport.csv" -NoTypeInformation
-    Write-Host "Provisioning complete. Report saved to C:\ProvisioningReport.csv"
 
 </p>
 
