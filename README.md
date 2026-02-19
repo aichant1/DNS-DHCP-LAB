@@ -53,7 +53,7 @@ Simulated a DNS misconfiguration and performed troubleshooting to restore connec
 
 
 <h2>Lab walk-through:</h2>
-Coming Soon
+Will be uploading soon.
 
 </p>
 
